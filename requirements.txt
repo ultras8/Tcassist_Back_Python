@@ -1,0 +1,10 @@
+# Database
+psycopg2-binary        # ตัวเชื่อมต่อ PostgreSQL
+python-dotenv          # สำหรับอ่านไฟล์ .env
+
+# Web Scraping
+requests               # สำหรับดึงข้อมูลจาก HTTP API
+beautifulsoup4         # สำหรับแกะข้อมูลจาก HTML (กรณีดึงหน้าเว็บ)
+
+# AI & Data
+google-generativeai    # สำหรับใช้งาน Gemini API เพื่อสรุปเกณฑ์ PDF
