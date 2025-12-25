@@ -23,18 +23,35 @@ def parse_pdf_to_criteria(file_path):
     # 3. สั่งให้ AI อ่านไฟล์และสกัดข้อมูล
     model = genai.GenerativeModel('models/gemini-2.5-flash')
     
-    prompt = """
-    จากไฟล์ PDF ระเบียบการ TCAS ที่แนบมานี้ 
-    จงสกัดข้อมูลเกณฑ์คะแนนการรับสมัคร (Admission Criteria) ของทุกสาขาวิชาที่ปรากฏ
-    ให้ออกมาเป็น List ของ JSON ตามรูปแบบนี้เท่านั้น:
-    [{
-        "uni_full": "ชื่อมหาวิทยาลัย",
-        "faculty": "คณะ",
-        "major": "สาขา",
-        "program_code": "รหัสหลักสูตร 14 หลัก",
-        "weights": { "tgat": 20, "tpat3": 30, ... }
-    }]
-    ตอบกลับเฉพาะ JSON เท่านั้น
+    prompt = f"""
+    คุณเป็นผู้เชี่ยวชาญด้านข้อมูล TCAS 
+    จงสกัดข้อมูลเกณฑ์คะแนนจากข้อความที่กำหนดให้อยู่ในรูปแบบ JSON เท่านั้น โดยห้ามมีคำอธิบายอื่นเพิ่มเติม
+
+    ข้อความ:
+    "{raw_text}"
+
+    เงื่อนไขการสกัดข้อมูล:
+    - uni_full: ชื่อเต็มมหาวิทยาลัย
+    - uni_abbr: ชื่อย่อมหาวิทยาลัย (ถ้าไม่มีให้เป็น null)
+    - faculty: ชื่อคณะ
+    - major: ชื่อสาขาวิชา/วิชาเอก
+    - program_code: รหัสหลักสูตร 15 หลัก
+    - program_type: ให้ตอบเฉพาะค่า 'REGULAR', 'SPECIAL', 'INTERNATIONAL', หรือ 'ENGLISH_PROGRAM' เท่านั้น
+    - weights: สกัดชื่อวิชาและค่าน้ำหนัก (%) โดยใช้ Key เป็นภาษาอังกฤษตัวเล็ก (เช่น tgat, tpat1, tpat3, a_level_math1, a_level_phy)
+
+    รูปแบบ JSON ที่ต้องการ:
+    {{
+        "uni_full": "...",
+        "uni_abbr": "...",
+        "faculty": "...",
+        "major": "...",
+        "program_code": "...",
+        "program_type": "...",
+        "weights": {{
+            "วิชา": 0,
+            "วิชา": 0
+        }}
+    }}
     """
 
     generation_config = {"response_mime_type": "application/json"}

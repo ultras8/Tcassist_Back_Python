@@ -11,42 +11,47 @@ def sync_data(scraped_items):
         cur = conn.cursor(cursor_factory=extras.RealDictCursor)
 
         for item in scraped_items:
-            # 1. จัดการตาราง universities (Check or Insert)
+            # 1. จัดการตาราง universities
             cur.execute(
                 'SELECT id FROM universities WHERE "fullName" = %s', 
-                (item['uni_full'],)
+                (item['fullName'],) # แก้จาก uni_full
             )
             uni = cur.fetchone()
 
             if not uni:
-                print(f"➕ Adding University: {item['uni_full']}")
+                print(f"➕ Adding University: {item['fullName']}")
                 cur.execute(
                     'INSERT INTO universities ("fullName", "abbr", "createdAt") VALUES (%s, %s, NOW()) RETURNING id',
-                    (item['uni_full'], item['uni_abbr'])
+                    (item['fullName'], item['abbr']) # แก้จาก uni_full, uni_abbr
                 )
                 uni_id = cur.fetchone()['id']
             else:
                 uni_id = uni['id']
 
-            # 2. จัดการตาราง admission_criteria (Upsert โดยใช้ programCode)
-            print(f"📑 Syncing: {item['faculty']} - {item['major']}")
+            # 2. จัดการตาราง admission_criteria (Upsert)
+            print(f"📑 Syncing: {item['facultyName']} - {item['majorName']}")
             
-            # ใส่ Double Quotes ครอบชื่อ Column ที่เป็น camelCase
+            # เราจะระบุชื่อคอลัมน์ชัดๆ เพื่อให้ Postgres ไม่งง (และไม่ต้องใส่ครบทุกช่องก็ได้)
             query = """
                 INSERT INTO admission_criteria 
-                ("universityId", "facultyName", "majorName", "programCode", "scoreWeights", "createdAt", "updatedAt")
-                VALUES (%s, %s, %s, %s, %s, NOW(), NOW())
+                ("universityId", "facultyName", "majorName", "programCode", "scoreWeights", "programType", "createdAt", "updatedAt")
+                VALUES (%s, %s, %s, %s, %s, %s, NOW(), NOW())
                 ON CONFLICT ("programCode") DO UPDATE SET
                     "scoreWeights" = EXCLUDED."scoreWeights",
+                    "programType" = EXCLUDED."programType",
+                    "facultyName" = EXCLUDED."facultyName",
+                    "majorName" = EXCLUDED."majorName",
                     "updatedAt" = NOW();
             """
             
+            # ส่งค่าให้ตรงกับ %s ทั้ง 6 ตัวข้างบน
             cur.execute(query, (
-                uni_id,
-                item['faculty'],
-                item['major'],
-                item['program_code'],
-                json.dumps(item['weights'])
+                uni_id,                              # 1. "universityId"
+                item['facultyName'],                 # 2. "facultyName"
+                item['majorName'],                   # 3. "majorName"
+                item['programCode'],                 # 4. "programCode"
+                json.dumps(item['scoreWeights']),     # 5. "scoreWeights"
+                item.get('programType', 'REGULAR').lower()   # 6. "programType" (ตัวเจ้าปัญหา!)
             ))
 
         conn.commit()
@@ -58,15 +63,3 @@ def sync_data(scraped_items):
     finally:
         cur.close()
         conn.close()
-
-# --- ทดสอบรันด้วยข้อมูล Mock ---
-if __name__ == "__main__":
-    test_data = [{
-        "uni_full": "จุฬาลงกรณ์มหาวิทยาลัย",
-        "uni_abbr": "CU",
-        "faculty": "วิศวกรรมศาสตร์",
-        "major": "วิศวกรรมคอมพิวเตอร์",
-        "program_code": "10010101101011",
-        "weights": {"tgat": 20, "tpat3": 30, "a_level_math1": 50}
-    }]
-    sync_data(test_data)
