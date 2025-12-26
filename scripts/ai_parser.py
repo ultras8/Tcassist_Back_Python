@@ -7,7 +7,7 @@ load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 def extract_admission_criteria(raw_text):
-    model = genai.GenerativeModel('models/gemini-2.5-flash')
+    model = genai.GenerativeModel('gemini-2.0-flash')
     
     prompt = f"""
     คุณเป็นผู้เชี่ยวชาญด้านข้อมูล TCAS 
