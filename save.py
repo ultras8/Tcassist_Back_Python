@@ -1,33 +1,53 @@
 import asyncio
-import os  # เพิ่มตัวนี้เพื่อจัดการโฟลเดอร์
+import os
 from playwright.async_api import async_playwright
 
 async def js_striker():
-    print("🧨 เริ่มภารกิจระเบิดปุ่ม: ใช้ JS Injection คลิกตรงจุด!")
+    print("🧨 เริ่มภารกิจระเบิดปุ่ม: กวาดข้อมูล TCAS ครบวงจร!")
     
-    # --- 📁 ขั้นตอนเตรียมโฟลเดอร์ ---
+    # --- 📁 เตรียมโฟลเดอร์ ---
     folder_name = "all_scores"
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
-        print(f"📁 สร้างโฟลเดอร์ใหม่: {folder_name}")
-    # ---------------------------
+
+    # --- 📄 อ่านรหัสจากไฟล์ mega_unis_links.txt ---
+    # สมมติในไฟล์เป็นลิ้งก์แบบ https://course.mytcas.com/programs/10010121300001A
+    target_codes = []
+    try:
+        with open("mega_unis_links.txt", "r", encoding="utf-8") as f:
+            for line in f:
+                code = line.strip().split('/')[-1] # ดึงตัวหลังสุดมา
+                if code:
+                    target_codes.append(code)
+        print(f"📖 อ่านรหัสทั้งหมดได้: {len(target_codes)} รายการ")
+    except FileNotFoundError:
+        print("❌ ไม่พบไฟล์ mega_unis_links.txt")
+        return
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
-        page = await browser.new_page()
+        # เปิด headless=True จะทำงานเร็วกว่าและไม่รบกวนหน้าจอค่ะ
+        browser = await p.chromium.launch(headless=True) 
+        context = await browser.new_context(user_agent="Mozilla/5.0 ...")
+        page = await context.new_page()
         
-        target_codes = ["10010121300001A", "10010121300501A", "10010121300601A"]
-        
-        for code in target_codes:
+        for index, code in enumerate(target_codes):
+            file_path = os.path.join(folder_name, f"unlocked_score_{code}.txt")
+            
+            # ✅ ระบบข้ามไฟล์ที่เคยโหลดแล้ว (Resume)
+            if os.path.exists(file_path):
+                # print(f"⏭️ ข้าม {code} (โหลดไปแล้ว)")
+                continue
+
             url = f"https://course.mytcas.com/programs/{code}"
-            print(f"\n🚀 เข้าสู่เป้าหมาย: {url}")
+            print(f"🚀 [{index+1}/{len(target_codes)}] กำลังกวาด: {code}")
             
             try:
-                await page.goto(url, wait_until="networkidle", timeout=60000)
-                await asyncio.sleep(5)
+                # ลด timeout เหลือ 30 วินาทีเพื่อความไว
+                await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+                await asyncio.sleep(2) # รอโครงสร้างหน้าเว็บนิดนึง
 
                 # 🖱️ คลิกเลข 3
-                print("🖱️ กำลังสั่ง JavaScript คลิกเลข 3...")
+                # print("🖱️ กำลังสั่ง JavaScript คลิกเลข 3...")
                 await page.evaluate("""
                     () => {
                         const links = Array.from(document.querySelectorAll('a'));
@@ -38,17 +58,15 @@ async def js_striker():
                         if (node) { node.click(); }
                     }
                 """)
-                
-                await asyncio.sleep(3) 
+                await asyncio.sleep(3)
 
-                # 🎯 กาง Admission
-                print("⏳ รอให้ปุ่ม Admission ของรอบ 3 ปรากฏ...")
+                # กาง Admission รอบ 3
                 admission_selector = '#r3 span:text-is("Admission"), #r3 h2 span'
                 
                 try:
                     target_btn = page.locator(admission_selector).first
                     await target_btn.wait_for(state="attached", timeout=10000) 
-                    print("🎯 เจอ Admission รอบ 3 แล้ว! กำลังกาง...")
+                    # print("🎯 เจอ Admission รอบ 3 แล้ว! กำลังกาง...")
                     await target_btn.scroll_into_view_if_needed()
                     await target_btn.evaluate("el => el.click()")
                 except Exception:
@@ -60,26 +78,20 @@ async def js_striker():
                             arrows.forEach(el => el.click());
                         }
                     }""")
+                
+                await asyncio.sleep(3) # รอให้ Text กางออกมา
 
-                print("⏳ กางแล้ว! รอข้อมูลเกณฑ์คะแนนไหลออก...")
-                await asyncio.sleep(10) # เพิ่มเวลาอีกนิดให้ชัวร์ว่าโหลดครบ
-
-                # 💾 บันทึกไฟล์ลงในโฟลเดอร์ all_scores
+                # 💾 บันทึกเฉพาะข้อความ
                 content = await page.inner_text("body")
-                
-                # ระบุ Path ให้ไปอยู่ที่ folder/filename
-                file_path = os.path.join(folder_name, f"unlocked_score_{code}.txt")
-                
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(content)
                 
-                print(f"✅ สำเร็จ! เขียนไฟล์ลงใน: {file_path}")
-                
             except Exception as e:
-                print(f"❌ พลาดรหัส {code}: {str(e)[:50]}")
+                print(f"❌ พลาด {code}: {str(e)[:30]}")
+                continue # ไปตัวต่อไปทันที
 
         await browser.close()
-        print(f"\n🏁 จบภารกิจ! ไฟล์ทั้งหมดอยู่ในโฟลเดอร์ '{folder_name}' แล้วค่ะ")
+        print(f"\n🏁 จบภารกิจ! ข้อมูลชุดใหญ่ไฟกระพริบอยู่ที่ '{folder_name}' แล้วค่ะ")
 
 if __name__ == "__main__":
     asyncio.run(js_striker())
