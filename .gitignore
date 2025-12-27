@@ -15,5 +15,5 @@ venv/
 Thumbs.db
 
 # ข้ามโฟลเดอร์เก็บไฟล์คะแนนทั้งหมด
-all_scores/
-processed_scores/
+data_criteria/
+data_stats/

@@ -25,7 +25,7 @@ async def js_striker():
         return
 
     async with async_playwright() as p:
-        # เปิด headless=True จะทำงานเร็วกว่าและไม่รบกวนหน้าจอค่ะ
+        # เปิด headless=True จะทำงานเร็วกว่าและไม่รบกวนหน้าจอ
         browser = await p.chromium.launch(headless=True) 
         context = await browser.new_context(user_agent="Mozilla/5.0 ...")
         page = await context.new_page()

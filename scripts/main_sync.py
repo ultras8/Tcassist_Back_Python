@@ -71,8 +71,8 @@ def process_and_sync(raw_text, code_from_filename=None):
             "อาชีวะ": "vocational",
             "ENGLISH": "english",
             "ภาษาอังกฤษ": "english",
-            "พิเศษ": "special",     # ✨ เปลี่ยนจาก "regular" เป็น "special"
-            "SPECIAL": "special"    # ✨ เพิ่มตัวนี้เข้าไปด้วย
+            "พิเศษ": "special",
+            "SPECIAL": "special"
         }
         final_program_type = type_mapping.get(ai_program_type, "regular")
 
