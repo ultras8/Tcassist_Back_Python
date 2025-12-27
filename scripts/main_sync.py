@@ -11,7 +11,7 @@ client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 MODEL_NAME = "gemini-2.0-flash" 
 
 def process_and_sync(raw_text, code_from_filename=None):
-    print(f"🤖 กำลังให้ AI ({MODEL_NAME}) วิเคราะห์ข้อมูล...")
+    print(f"กำลังให้ AI ({MODEL_NAME}) วิเคราะห์ข้อมูล")
     
     prompt = f"""
     คุณเป็นผู้เชี่ยวชาญด้านข้อมูล TCAS (Admission) ของประเทศไทย
@@ -57,10 +57,10 @@ def process_and_sync(raw_text, code_from_filename=None):
         if isinstance(data, list):
             data = data[0]
             
-        # ✨ [จุดที่ 1] แก้บั๊ก NameError: final_code is not defined
+        # แก้บั๊ก NameError: final_code is not defined
         final_code = data.get('program_code') or code_from_filename
             
-        # ✨ [จุดที่ 2] Mapping Enum ป้องกัน Error "พิเศษ"
+        # Mapping Enum
         ai_program_type = str(data.get('program_type', 'REGULAR')).upper()
         type_mapping = {
             "REGULAR": "regular",
@@ -92,7 +92,7 @@ def process_and_sync(raw_text, code_from_filename=None):
         }
         
         formatted_data = [single_item]
-        print(f"✅ AI แกะข้อมูลสำเร็จ: {single_item['majorName']} [Code: {final_code}]")
+        print(f"AI แกะข้อมูลสำเร็จ: {single_item['majorName']} [Code: {final_code}]")
         
         # --- 5. ส่งเข้า Database ---
         # แก้ไข: ให้ส่งค่า True กลับไปบอก bulk_extractor ว่าสำเร็จ
@@ -100,7 +100,7 @@ def process_and_sync(raw_text, code_from_filename=None):
         return True
 
     except Exception as e:
-        print(f"❌ เกิดข้อผิดพลาดใน process_and_sync: {e}")
+        print(f"เกิดข้อผิดพลาดใน process_and_sync: {e}")
         return False
 
 if __name__ == "__main__":
