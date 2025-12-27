@@ -18,8 +18,8 @@ def get_engine():
         conn_str = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{db_name}"
         
         engine = create_engine(conn_str)
-        print("✅ SQLAlchemy Engine Ready!")
+        print("SQLAlchemy Engine Ready!")
         return engine
     except Exception as e:
-        print(f"❌ Error creating engine: {e}")
+        print(f"Error creating engine: {e}")
         return None
