@@ -12,7 +12,7 @@ def sync_data(scraped_items):
     try:
         cur = conn.cursor(cursor_factory=extras.RealDictCursor)
         for item in scraped_items:
-            # --- 1. จัดการมหาวิทยาลัย (หาไม่เจอ...สร้างใหม่!) ---
+            # --- จัดการมหาวิทยาลัย (หาไม่เจอให้สร้างใหม่) ---
             full_name = item.get('fullName')
             cur.execute('SELECT id FROM universities WHERE "fullName" = %s', (full_name,))
             uni = cur.fetchone()
@@ -20,8 +20,8 @@ def sync_data(scraped_items):
             if uni:
                 uni_id = uni['id']
             else:
-                # ✨ จุดไม้ตาย: สร้างมหาวิทยาลัยใหม่ทันที
-                print(f"🆕 พบมหาวิทยาลัยใหม่: {full_name} ... กำลังเพิ่มลงในระบบ")
+                # สร้างมหาวิทยาลัยใหม่
+                print(f"พบมหาวิทยาลัยใหม่: {full_name} กำลังเพิ่มลงในระบบ")
                 insert_uni_query = """
                     INSERT INTO universities ("fullName", "abbr")
                     VALUES (%s, %s)
@@ -30,14 +30,14 @@ def sync_data(scraped_items):
                 cur.execute(insert_uni_query, (full_name, item.get('abbr', '')))
                 uni_id = cur.fetchone()['id']
 
-            # 🚨 ตรวจสอบเฉพาะ Program Code เท่านั้น (เพราะ Uni ID เราการันตีว่ามีแน่แล้ว)
+            # ตรวจสอบเฉพาะ Program Code เท่านั้น (เพราะ Uni ID เราการันตีว่ามีแน่แล้ว)
             if not item.get('programCode'):
-                print(f"\n❌ [ERROR] ข้ามรายการนี้เพราะไม่มี Program Code:")
+                print(f"\n [ERROR] ข้ามรายการนี้เพราะไม่มี Program Code:")
                 print(f"   - สาขา: {item.get('majorName')}")
                 continue 
 
-            # --- 2. เริ่ม Sync ข้อมูลเข้า admission_criteria ---
-            print(f"📑 Syncing: {item['facultyName']} - {item['majorName']} ({item['year']})")
+            # --- เริ่ม Sync ข้อมูลเข้า admission_criteria ---
+            print(f"Syncing: {item['facultyName']} - {item['majorName']} ({item['year']})")
             
             query = """
                 INSERT INTO admission_criteria 
@@ -76,10 +76,10 @@ def sync_data(scraped_items):
             ))
             
         conn.commit()
-        print("🎉 ภารกิจ Sync ข้อมูลสำเร็จเรียบร้อยค่ะ!")
+        print("ภารกิจ Sync ข้อมูลสำเร็จเรียบร้อยค่ะ!")
         
     except Exception as e:
-        print(f"❌ Error ใน sync_manager: {e}")
+        print(f"Error ใน sync_manager: {e}")
         if conn:
             conn.rollback()
     finally:
