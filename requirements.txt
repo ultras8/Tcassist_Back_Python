@@ -1,0 +1,20 @@
+# 🐍 Core Data Processing
+pandas==2.2.0
+numpy==1.26.0
+
+# 📊 Database Connection
+sqlalchemy==2.0.25
+psycopg2-binary==2.9.9
+
+# 🧠 Machine Learning / Math
+scikit-learn==1.4.0
+scipy==1.12.0
+
+# 🌐 API Framework (สำหรับสร้าง Microservice มาคุยกับ NestJS)
+fastapi==0.109.0
+uvicorn==0.27.0
+pydantic==2.5.3
+
+# 🛠️ Utilities
+python-dotenv==1.0.1
+requests==2.31.0
