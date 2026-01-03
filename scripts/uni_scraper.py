@@ -11,14 +11,13 @@ async def mega_university_scanner_v3_fixed():
     
     filename = "mega_unis_links.txt"
     
-    # --- 1. อ่านข้อมูลเก่าที่มีในไฟล์ขึ้นมาจำไว้ก่อน ---
+    # --- อ่านข้อมูลเก่าที่มีในไฟล์ขึ้นมาจำไว้ก่อน ---
     existing_links = set()
     if os.path.exists(filename):
         with open(filename, "r", encoding="utf-8") as f:
             existing_links = set(line.strip() for line in f if line.strip())
     
-    print(f"📂 ตรวจพบข้อมูลเดิมในไฟล์: {len(existing_links)} ลิ้งก์")
-    print(f"🚀 เริ่มภารกิจ Mega Scanner: กวาดล้าง 20 สถาบัน")
+    print(f"ตรวจพบข้อมูลเดิมในไฟล์: {len(existing_links)} ลิ้งก์")
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=False)
@@ -31,7 +30,7 @@ async def mega_university_scanner_v3_fixed():
                 await page.goto(f"https://course.mytcas.com/universities/{uni_id}", wait_until="domcontentloaded")
                 await asyncio.sleep(2)
 
-                # 1. ล่าลิ้งก์คณะ
+                # ล่าลิ้งก์คณะ
                 faculty_links = [f"https://course.mytcas.com{await a.get_attribute('href')}" 
                                  for a in await page.query_selector_all('a[href*="/faculties/"]')]
 
@@ -58,13 +57,13 @@ async def mega_university_scanner_v3_fixed():
 
                             for code in found_codes:
                                 full_url = f"https://course.mytcas.com/programs/{code}"
-                                # ✨ เช็คว่าลิ้งก์นี้ไม่อยู่ใน "ของเก่า" และ "ของใหม่ที่เพิ่งเจอ"
+                                # เช็คว่าลิ้งก์นี้ไม่อยู่ใน "ของเก่า" และ "ของใหม่ที่เพิ่งเจอ"
                                 if full_url not in existing_links and full_url not in all_program_urls:
                                     all_program_urls.add(full_url)
                         except:
                             continue
                 
-                # --- 2. บันทึกผลเฉพาะ "ของใหม่" ต่อท้ายไฟล์ (Append) ---
+                # --- บันทึกผลเฉพาะ "ของใหม่" ต่อท้ายไฟล์ (Append) ---
                 if all_program_urls:
                     new_links_list = sorted(list(all_program_urls))
                     with open(filename, "a", encoding="utf-8") as f:
@@ -73,15 +72,15 @@ async def mega_university_scanner_v3_fixed():
                     
                     # อัปเดต existing_links เพื่อกันซ้ำในมหาลัยถัดไปด้วย
                     existing_links.update(all_program_urls)
-                    print(f"✅ จบมหาลัย {uni_id} เซฟเพิ่มใหม่: {len(all_program_urls)} ลิ้งก์")
+                    print(f"จบมหาลัย {uni_id} เซฟเพิ่มใหม่: {len(all_program_urls)} ลิ้งก์")
                 else:
-                    print(f"✅ จบมหาลัย {uni_id} (ไม่พบลิ้งก์ใหม่ที่ยังไม่มีในไฟล์)")
+                    print(f"จบมหาลัย {uni_id} (ไม่พบลิ้งก์ใหม่ที่ยังไม่มีในไฟล์)")
 
             except Exception as e:
-                print(f"⚠️ มหาลัย {uni_id} ขัดข้อง: {e}")
+                print(f"มหาลัย {uni_id} ขัดข้อง: {e}")
 
         await browser.close()
-        print(f"🏆 ภารกิจสำเร็จ! ยอดรวมในไฟล์ตอนนี้คือ: {len(existing_links)} ลิ้งก์!")
+        print(f"ภารกิจสำเร็จ ยอดรวมในไฟล์ตอนนี้คือ: {len(existing_links)} ลิ้งก์")
 
 if __name__ == "__main__":
     asyncio.run(mega_university_scanner_v3_fixed())
