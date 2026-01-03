@@ -29,7 +29,7 @@ def process_files():
         try:
             with engine.begin() as conn:
                 conn.execute(text("TRUNCATE TABLE admission_stats RESTART IDENTITY CASCADE;"))
-                print("🗑️ ล้างข้อมูลเก่าในตาราง admission_stats เรียบร้อย (Clean Start!)")
+                print("ล้างข้อมูลเก่าในตาราง admission_stats เรียบร้อย (Clean Start!)")
         except Exception as e:
             print(f"คำเตือน: ล้างตารางไม่สำเร็จ: {e}")
 
@@ -52,6 +52,7 @@ def process_files():
             # ตัดรหัสให้เหลือแค่ 14 หลักแรก เพื่อรวบรวมตัวเลือก A, B, E เข้าด้วยกัน
             df['programCode'] = df[code_col[0]].astype(str).str.strip().str[:14]
         else:
+            print(f"ข้ามไฟล์ {filename} เพราะหารหัสหลักสูตรไม่เจอ")
             continue
 
         # แมปชื่อคอลัมน์
@@ -106,7 +107,7 @@ def process_files():
         if engine:
             try:
                 df_final.to_sql('admission_stats', con=engine, if_exists='append', index=False)
-                print(f"บันทึกปี {year} (ยุบรวมแล้ว) เรียบร้อย! ({len(df_final)} แถว)")
+                print(f"บันทึกปี {year} เรียบร้อย ({len(df_final)} แถว)")
             except Exception as e:
                 print(f"พังที่ไฟล์ {filename}: {e}")
 

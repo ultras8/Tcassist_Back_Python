@@ -26,7 +26,7 @@ async def mega_university_scanner_v3_fixed():
         for uni_id in target_unis:
             all_program_urls = set() # เก็บเฉพาะของรอบนี้
             try:
-                print(f"🏢 บุกมหาลัย: {uni_id}")
+                print(f"บุกมหาลัย: {uni_id}")
                 await page.goto(f"https://course.mytcas.com/universities/{uni_id}", wait_until="domcontentloaded")
                 await asyncio.sleep(2)
 
@@ -35,7 +35,7 @@ async def mega_university_scanner_v3_fixed():
                                  for a in await page.query_selector_all('a[href*="/faculties/"]')]
 
                 for f_url in faculty_links:
-                    print(f"   🔎 สแกนคณะ: {f_url.split('/')[-1]}")
+                    print(f"สแกนคณะ: {f_url.split('/')[-1]}")
                     await page.goto(f_url, wait_until="domcontentloaded")
                     
                     field_links = [f"https://course.mytcas.com{await a.get_attribute('href')}" 
@@ -57,13 +57,13 @@ async def mega_university_scanner_v3_fixed():
 
                             for code in found_codes:
                                 full_url = f"https://course.mytcas.com/programs/{code}"
-                                # เช็คว่าลิ้งก์นี้ไม่อยู่ใน "ของเก่า" และ "ของใหม่ที่เพิ่งเจอ"
+                                # เช็คว่าลิ้งก์นี้ไม่อยู่ในของเก่า และ ของใหม่ที่เพิ่งเจอ
                                 if full_url not in existing_links and full_url not in all_program_urls:
                                     all_program_urls.add(full_url)
                         except:
                             continue
                 
-                # --- บันทึกผลเฉพาะ "ของใหม่" ต่อท้ายไฟล์ (Append) ---
+                # --- บันทึกผลเฉพาะของใหม่ ต่อท้ายไฟล์ (Append) ---
                 if all_program_urls:
                     new_links_list = sorted(list(all_program_urls))
                     with open(filename, "a", encoding="utf-8") as f:

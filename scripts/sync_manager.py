@@ -12,7 +12,7 @@ def sync_data(scraped_items):
     try:
         cur = conn.cursor(cursor_factory=extras.RealDictCursor)
         for item in scraped_items:
-            # --- จัดการมหาวิทยาลัย (หาไม่เจอสร้างใหม่) ---
+            # --- จัดการมหาวิทยาลัย (หาไม่เจอให้สร้างใหม่) ---
             full_name = item.get('fullName')
             cur.execute('SELECT id FROM universities WHERE "fullName" = %s', (full_name,))
             uni = cur.fetchone()
@@ -20,8 +20,8 @@ def sync_data(scraped_items):
             if uni:
                 uni_id = uni['id']
             else:
-                # สร้างมหาวิทยาลัยใหม่ทันที
-                print(f"พบมหาวิทยาลัยใหม่: {full_name} ... กำลังเพิ่มลงในระบบ")
+                # สร้างมหาวิทยาลัยใหม่
+                print(f"พบมหาวิทยาลัยใหม่: {full_name} กำลังเพิ่มลงในระบบ")
                 insert_uni_query = """
                     INSERT INTO universities ("fullName", "abbr")
                     VALUES (%s, %s)

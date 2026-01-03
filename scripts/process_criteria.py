@@ -21,8 +21,7 @@ def start_extraction():
     success_count = 0
     fail_count = 0
 
-    print(f" ตรวจพบไฟล์ที่ต้องจัดการทั้งหมด {total_files} รายการ")
-    print("เริ่มระบบสายพานอัตโนมัติ...")
+    print(f"ตรวจพบไฟล์ที่ต้องจัดการทั้งหมด {total_files} รายการ")
 
     for index, filename in enumerate(all_files):
         file_path = os.path.join(folder_path, filename)
@@ -68,7 +67,6 @@ def start_extraction():
                     break # ออกจาก while ไปทำไฟล์ถัดไป
 
     print("\n" + "="*30)
-    print("จบภารกิจ")
     print(f"สำเร็จ: {success_count} ไฟล์")
     print(f"พลาด: {fail_count} ไฟล์")
     print(f"ไฟล์ที่สำเร็จถูกแยกไว้ที่: {success_path}")

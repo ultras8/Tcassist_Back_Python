@@ -11,7 +11,7 @@ client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 MODEL_NAME = "gemini-2.0-flash" 
 
 def process_and_sync(raw_text, code_from_filename=None):
-    print(f"กำลังให้ AI ({MODEL_NAME}) วิเคราะห์ข้อมูล...")
+    print(f"กำลังให้ AI ({MODEL_NAME}) วิเคราะห์ข้อมูล")
     
     prompt = f"""
     คุณเป็นผู้เชี่ยวชาญด้านข้อมูล TCAS (Admission) ของประเทศไทย
@@ -57,9 +57,10 @@ def process_and_sync(raw_text, code_from_filename=None):
         if isinstance(data, list):
             data = data[0]
             
+        # แก้บั๊ก NameError: final_code is not defined
         final_code = data.get('program_code') or code_from_filename
             
-        # Mapping Enum ป้องกัน Error "พิเศษ"
+        # Mapping Enum
         ai_program_type = str(data.get('program_type', 'REGULAR')).upper()
         type_mapping = {
             "REGULAR": "regular",

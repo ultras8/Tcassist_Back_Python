@@ -44,7 +44,7 @@ async def js_striker():
                 await asyncio.sleep(2) # รอโครงสร้างหน้าเว็บนิดนึง
 
                 # คลิกเลข 3
-                # print("กำลังสั่ง JavaScript คลิกเลข 3...")
+                # print("กำลังสั่ง JavaScript คลิกเลข 3")
                 await page.evaluate("""
                     () => {
                         const links = Array.from(document.querySelectorAll('a'));
@@ -63,11 +63,11 @@ async def js_striker():
                 try:
                     target_btn = page.locator(admission_selector).first
                     await target_btn.wait_for(state="attached", timeout=10000) 
-                    # print("เจอ Admission รอบ 3 แล้ว! กำลังกาง...")
+                    # print("เจอ Admission รอบ 3 แล้ว กำลังกาง")
                     await target_btn.scroll_into_view_if_needed()
                     await target_btn.evaluate("el => el.click()")
                 except Exception:
-                    print(f"แผนแรกพลาด ลองกวาดทุกลูกศร...")
+                    print(f"แผนแรกพลาด ลองกวาดทุกลูกศร")
                     await page.evaluate("""() => {
                         const r3Zone = document.getElementById('r3');
                         if (r3Zone) {
